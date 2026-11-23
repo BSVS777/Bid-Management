@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block title %}Editar proveedor{% endblock %}
+{% block content %}
+<h1>Editar proveedor #{{ supplier_id }}</h1>
+{% if error %}<div class="error" role="alert">{{ error }}</div>{% endif %}
+<form method="post" action="/suppliers/{{ supplier_id }}/edit">
+  <label for="name">Nombre del proveedor</label><br>
+  <input type="text" id="name" name="name" value="{{ name }}" required>
+  <button type="submit">Guardar</button>
+  <a href="/suppliers">Cancelar</a>
+</form>
+{% endblock %}

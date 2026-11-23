@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Bid-Management{% endblock %}</title>
+  <style>
+    body { font-family: system-ui, sans-serif; margin: 0; background: #f5f6f8; color: #1d2430; }
+    nav { background: #1f3a5f; padding: .8rem 1.5rem; }
+    nav a { color: #fff; text-decoration: none; font-weight: 600; margin-right: 1rem; }
+    main { max-width: 760px; margin: 1.5rem auto; background: #fff; padding: 1.5rem; border-radius: 8px; }
+    table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+    th, td { text-align: left; padding: .5rem; border-bottom: 1px solid #e3e6eb; }
+    input[type=text] { padding: .5rem; width: 20rem; max-width: 100%; }
+    button { padding: .5rem 1rem; background: #1f3a5f; color: #fff; border: 0; border-radius: 4px; cursor: pointer; }
+    .error { background: #fdecea; color: #8a1c13; padding: .6rem .8rem; border-radius: 4px; margin: .8rem 0; }
+  </style>
+</head>
+<body>
+  <nav><a href="/suppliers">Proveedores</a></nav>
+  <main>{% block content %}{% endblock %}</main>
+</body>
+</html>
