@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}Proveedores{% endblock %}
+{% block content %}
+<h1>Proveedores</h1>
+<form method="post" action="/suppliers">
+  <label for="name">Nombre del proveedor</label><br>
+  <input type="text" id="name" name="name" value="{{ name }}" required>
+  <button type="submit">Crear</button>
+</form>
+{% if error %}<div class="error" role="alert">{{ error }}</div>{% endif %}
+<table>
+  <thead><tr><th>ID</th><th>Nombre</th><th></th></tr></thead>
+  <tbody>
+  {% for s in suppliers %}
+    <tr><td>{{ s.id }}</td><td>{{ s.name }}</td><td><a href="/suppliers/{{ s.id }}/edit">Editar</a></td></tr>
+  {% else %}
+    <tr><td colspan="3">No hay proveedores registrados.</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

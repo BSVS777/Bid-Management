@@ -10,10 +10,16 @@ pip install -r requirements.txt
 ```
 
 ## Ejecución
-(pendiente)
+```
+uvicorn app.main:app --reload
+```
+Abrir http://127.0.0.1:8000 (redirige a `/suppliers`). Variable opcional `BID_DB_URL` (por defecto `sqlite:///./bid_management.db`).
 
 ## Pruebas
-(pendiente)
+```
+python -m pytest -q
+python -m pytest --cov=app
+```
 
 ## Reinicio de datos sintéticos
 (pendiente)
