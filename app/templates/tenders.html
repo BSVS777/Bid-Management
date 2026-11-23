@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}Licitaciones{% endblock %}
+{% block content %}
+<h1>Licitaciones</h1>
+<form method="post" action="/tenders">
+  <p><label for="code">Código</label><br>
+  <input type="text" id="code" name="code" value="{{ form.code }}" maxlength="30" required></p>
+  <p><label for="title">Título</label><br>
+  <input type="text" id="title" name="title" value="{{ form.title }}" maxlength="200" required></p>
+  <p><label for="budget_crc">Presupuesto (CRC)</label><br>
+  <input type="text" id="budget_crc" name="budget_crc" value="{{ form.budget_crc }}" inputmode="decimal" required></p>
+  <p><label for="closing_at">Fecha y hora de cierre</label><br>
+  <input type="datetime-local" id="closing_at" name="closing_at" value="{{ form.closing_at }}" required></p>
+  <button type="submit">Crear</button>
+</form>
+{% if error %}<div class="error" role="alert">{{ error }}</div>{% endif %}
+<table>
+  <thead><tr><th>ID</th><th>Código</th><th>Título</th><th>Presupuesto (CRC)</th><th>Cierre</th><th>Estado</th><th></th></tr></thead>
+  <tbody>
+  {% for t in tenders %}
+    <tr>
+      <td>{{ t.id }}</td>
+      <td>{{ t.code }}</td>
+      <td>{{ t.title }}</td>
+      <td>{{ t.budget_cents | crc }}</td>
+      <td>{{ t.closing_at.strftime("%Y-%m-%d %H:%M") }}</td>
+      <td>{{ t.status }}</td>
+      <td>
+        {% if t.status == DRAFT %}
+          <a href="/tenders/{{ t.id }}/edit">Editar</a>
+          <form method="post" action="/tenders/{{ t.id }}/publish" style="display:inline"><button type="submit">Publicar</button></form>
+        {% elif t.status == PUBLISHED %}
+          <form method="post" action="/tenders/{{ t.id }}/close" style="display:inline"><button type="submit">Cerrar</button></form>
+        {% endif %}
+      </td>
+    </tr>
+  {% else %}
+    <tr><td colspan="7">No hay licitaciones registradas.</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% endblock %}
