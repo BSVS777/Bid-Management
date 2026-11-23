@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block title %}Ofertas{% endblock %}
+{% block content %}
+<h1>Ofertas de la licitación {{ tender.code }}</h1>
+<p><a href="/tenders">Volver a licitaciones</a></p>
+<section aria-label="Resumen de la licitación">
+  <p><strong>{{ tender.title }}</strong></p>
+  <p>Presupuesto: {{ tender.budget_cents | crc }} CRC &middot;
+     Cierre: {{ tender.closing_at.strftime("%Y-%m-%d %H:%M") }} &middot;
+     Estado: {{ tender.status }}</p>
+</section>
+
+<h2>Registrar oferta</h2>
+<form method="post" action="/tenders/{{ tender.id }}/bids">
+  <p><label for="supplier_id">Proveedor</label><br>
+  <select id="supplier_id" name="supplier_id" required>
+    <option value="">Seleccione un proveedor</option>
+    {% for s in suppliers %}
+    <option value="{{ s.id }}"{% if form.supplier_id == s.id|string %} selected{% endif %}>{{ s.name }}</option>
+    {% endfor %}
+  </select></p>
+  <p><label for="amount_crc">Monto (CRC)</label><br>
+  <input type="text" id="amount_crc" name="amount_crc" value="{{ form.amount_crc }}" inputmode="decimal" required></p>
+  <button type="submit">Registrar oferta</button>
+</form>
+{% if error %}<div class="error" role="alert">{{ error }}</div>{% endif %}
+
+<h2>Ofertas registradas</h2>
+<table>
+  <thead><tr><th>ID</th><th>Proveedor</th><th>Monto (CRC)</th><th>Registrada</th></tr></thead>
+  <tbody>
+  {% for b in bids %}
+    <tr><td>{{ b.id }}</td><td>{{ b.supplier.name }}</td><td>{{ b.amount_cents | crc }}</td><td>{{ b.created_at.strftime("%Y-%m-%d %H:%M:%S") }}</td></tr>
+  {% else %}
+    <tr><td colspan="4">No hay ofertas registradas.</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+
+<h2>Evaluación</h2>
+<section id="evaluation" aria-label="Evaluación">
+{% if evaluation.best_bid %}
+  <p>Mejor oferta: <strong>{{ evaluation.best_bid.supplier.name }}</strong> &ndash; {{ evaluation.best_bid.amount_cents | crc }} CRC</p>
+  <p>Ahorro: {{ evaluation.saving_percent }}%</p>
+  <p>Clasificación: {{ evaluation.classification }}</p>
+  <p>Aprobador: {{ evaluation.approver }}</p>
+{% else %}
+  <p>{{ evaluation.message }}</p>
+{% endif %}
+</section>
+{% endblock %}

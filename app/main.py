@@ -1,5 +1,6 @@
 """Application factory."""
 import logging
+from collections.abc import Sequence
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request
@@ -8,14 +9,19 @@ from fastapi.responses import JSONResponse, RedirectResponse
 from sqlalchemy.orm import sessionmaker
 
 from app import database
+from app.approval import DEFAULT_APPROVAL_RANGES, ApprovalRange, validate_ranges
 from app.clock import Clock, system_clock
-from app.routers import suppliers, suppliers_web, tenders, tenders_web
+from app.routers import bids, bids_web, suppliers, suppliers_web, tenders, tenders_web
 
 logger = logging.getLogger("bid_management")
 
 
-def create_app(db_url: str | None = None, clock: Clock | None = None) -> FastAPI:
-    """Build the app; db_url overrides the default database, clock the system time."""
+def create_app(db_url: str | None = None, clock: Clock | None = None,
+               approval_ranges: Sequence[ApprovalRange] | None = None) -> FastAPI:
+    """Build the app; db_url overrides the default database, clock the system time,
+    approval_ranges the default approver ranges (validated; ValueError if invalid)."""
+    ranges = validate_ranges(
+        DEFAULT_APPROVAL_RANGES if approval_ranges is None else approval_ranges)
     if db_url is None:
         engine, factory = database.engine, database.SessionLocal
     else:
@@ -31,10 +37,19 @@ def create_app(db_url: str | None = None, clock: Clock | None = None) -> FastAPI
     app.state.engine = engine
     app.state.session_factory = factory
     app.state.clock = clock or system_clock
+    app.state.approval_ranges = ranges
 
     @app.exception_handler(RequestValidationError)
     async def validation_handler(request: Request, _exc: RequestValidationError):
-        if request.url.path.startswith("/api/tenders"):
+        path = request.url.path
+        if path.endswith("/bids") and request.method == "POST":
+            detail = (
+                "Solicitud inválida: revise los campos 'supplier_id' (entero) "
+                "y 'amount_crc'."
+            )
+        elif path.endswith(("/bids", "/evaluation")):
+            detail = "Solicitud inválida: el identificador debe ser un número entero."
+        elif path.startswith("/api/tenders"):
             detail = (
                 "Solicitud inválida: revise los campos 'code', 'title', "
                 "'budget_crc' y 'closing_at'."
@@ -56,6 +71,8 @@ def create_app(db_url: str | None = None, clock: Clock | None = None) -> FastAPI
     app.include_router(suppliers_web.router)
     app.include_router(tenders.router)
     app.include_router(tenders_web.router)
+    app.include_router(bids.router)
+    app.include_router(bids_web.router)
     return app
 
 

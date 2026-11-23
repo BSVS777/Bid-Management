@@ -1,8 +1,9 @@
 """ORM models."""
 from datetime import datetime, timezone
 
-from sqlalchemy import CheckConstraint, DateTime, Integer, String
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy import (CheckConstraint, DateTime, ForeignKey, Integer, String,
+                        UniqueConstraint)
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database import Base
 
@@ -39,3 +40,29 @@ class Tender(Base):
     closing_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
     status: Mapped[str] = mapped_column(String(20), nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
+
+
+class Bid(Base):
+    """A supplier's offer on a tender; one per (tender, supplier)."""
+
+    __tablename__ = "bids"
+    __table_args__ = (
+        UniqueConstraint("tender_id", "supplier_id", name="uq_bids_tender_supplier"),
+        CheckConstraint("amount_cents > 0", name="ck_bids_amount_positive"),
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    tender_id: Mapped[int] = mapped_column(
+        Integer, ForeignKey("tenders.id"), nullable=False, index=True
+    )
+    supplier_id: Mapped[int] = mapped_column(
+        Integer, ForeignKey("suppliers.id"), nullable=False, index=True
+    )
+    # Offered amount in CRC as integer cents (never float).
+    amount_cents: Mapped[int] = mapped_column(Integer, nullable=False)
+    # Registration instant from the injected clock (naive local datetime).
+    created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
+
+    # Eagerly joined so rows stay usable after the session is closed.
+    supplier: Mapped[Supplier] = relationship(lazy="joined")
+    tender: Mapped[Tender] = relationship(lazy="joined")
