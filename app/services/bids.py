@@ -90,7 +90,7 @@ def create_bid(session: Session, now: datetime, tender_id: int, supplier_id: obj
         raise BidNotAllowedError(
             "Solo se aceptan ofertas en licitaciones en estado Publicada."
         )
-    if now >= tender.closing_at:  # exactly at closing_at is already rejected
+    if now > tender.closing_at:  # exactly at closing_at is already rejected
         raise BidNotAllowedError("La licitación ya cerró: no se aceptan más ofertas.")
     supplier = _validate_supplier(session, supplier_id)
     cents = validate_amount(amount_crc, tender.budget_cents)
