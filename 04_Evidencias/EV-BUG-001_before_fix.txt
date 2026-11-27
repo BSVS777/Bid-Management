@@ -1,0 +1,29 @@
+F                                                                        [100%]
+================================== FAILURES ===================================
+_____________________ test_cp014_closing_instant_boundary _____________________
+
+web = <starlette.testclient.TestClient object at 0x000001D8B9D03560>
+clock = <tests.conftest.FakeClock object at 0x000001D8B9C45B80>
+
+    def test_cp014_closing_instant_boundary(web, clock):
+        """CP-014 | REQ-004 | Bids one second before, exactly at and one second after closing |
+        oracle: bids accepted only before the closing time; exactly at closing is rejected"""
+        s1, s2, s3 = _supplier(web, P1), _supplier(web, P2), _supplier(web, P3)
+        tid = _tender(web)
+        clock.current = CLOSING_DT - timedelta(seconds=1)
+        assert _bid(web, tid, s1, "9000000.00").status_code == 200
+        clock.current = CLOSING_DT
+        at = _bid(web, tid, s2, "9000000.00")
+>       assert at.status_code == 409 and "ya cerró" in at.text
+E       assert (200 == 409)
+E        +  where 200 = <Response [200 OK]>.status_code
+
+tests\qa\test_cp_functional.py:99: AssertionError
+============================== warnings summary ===============================
+.venv\Lib\site-packages\starlette\testclient.py:37
+    _PortalFactoryType = typing.Callable[[], typing.ContextManager[anyio.abc.BlockingPortal]]
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ===========================
+FAILED tests/qa/test_cp_functional.py::test_cp014_closing_instant_boundary - ...
+1 failed, 1 warning in 0.24s
