@@ -1,0 +1,39 @@
+F                                                                        [100%]
+================================== FAILURES ===================================
+________________________ test_cp003_state_transitions _________________________
+
+session = <sqlalchemy.orm.session.Session object at 0x000001A4661964B0>
+
+    def test_cp003_state_transitions(session):
+        """CP-003 | REQ-003 | Allowed transitions succeed and forbidden ones are rejected |
+        oracle: Borrador->Publicada/Cerrada and Publicada->Cerrada allowed; no return to Borrador,
+        a Cerrada tender is never reopened"""
+        # Borrador -> Cerrada is allowed by REQ-003 (BUG-002 regression check).
+        d = tender_service.create_tender(session, NOW, "LIC-D", "Directo", "100.00", CLOSING)
+>       assert tender_service.close_tender(session, d.id).status == "Cerrada"
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\qa\test_cp_unit.py:69: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+session = <sqlalchemy.orm.session.Session object at 0x000001A4661964B0>
+tender_id = 1
+
+    def close_tender(session: Session, tender_id: int) -> Tender:
+        """Publicada -> Cerrada."""
+        tender = get_tender(session, tender_id)
+        if tender.status != TenderStatus.PUBLISHED:
+>           raise InvalidTransitionError(
+                "Solo se puede cerrar una licitación en estado Publicada."
+            )
+E           app.services.tenders.InvalidTransitionError: Solo se puede cerrar una licitación en estado Publicada.
+
+app\services\tenders.py:233: InvalidTransitionError
+============================== warnings summary ===============================
+.venv\Lib\site-packages\starlette\testclient.py:37
+    _PortalFactoryType = typing.Callable[[], typing.ContextManager[anyio.abc.BlockingPortal]]
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ===========================
+FAILED tests/qa/test_cp_unit.py::test_cp003_state_transitions - app.services....
+1 failed, 1 warning in 0.18s
