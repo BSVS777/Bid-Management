@@ -66,3 +66,18 @@ class Bid(Base):
     # Eagerly joined so rows stay usable after the session is closed.
     supplier: Mapped[Supplier] = relationship(lazy="joined")
     tender: Mapped[Tender] = relationship(lazy="joined")
+
+
+class ExchangeRate(Base):
+    """Exchange rate history (CRC per 1 USD); the newest row is the current rate."""
+
+    __tablename__ = "exchange_rates"
+    __table_args__ = (
+        CheckConstraint("rate_hundredths > 0", name="ck_exchange_rates_positive"),
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    # CRC per USD in hundredths (500.00 is stored as 50000); never float.
+    rate_hundredths: Mapped[int] = mapped_column(Integer, nullable=False)
+    # Registration instant from the injected clock (naive local datetime).
+    created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)

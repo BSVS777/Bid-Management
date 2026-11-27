@@ -14,6 +14,7 @@ from app.database import get_db
 from app.money import format_crc_display
 from app.routers.bids import to_http_error
 from app.services import bids as service
+from app.services import exchange_rate as rate_service
 from app.services import suppliers as supplier_service
 
 router = APIRouter(tags=["bids-web"], include_in_schema=False)
@@ -33,16 +34,30 @@ def _parse_supplier_id(raw: str) -> int | str:
 
 def _page(request: Request, db: Session, tender_id: int,
           ranges: tuple[ApprovalRange, ...], form: dict[str, str] | None = None,
-          error: str | None = None, status_code: int = 200):
+          error: str | None = None, status_code: int = 200,
+          currency: str = "CRC"):
     try:
         result = service.evaluate_tender(db, tender_id, ranges)
         bids = service.list_bids_by_tender(db, tender_id)
     except service.BidError as exc:
         raise to_http_error(exc) from None
+    rate = rate_service.get_current_rate(db) if currency == "USD" else None
+    if rate is not None:
+        hundredths = rate.rate_hundredths
+
+        def fmt(cents: int) -> str:
+            return format_crc_display(rate_service.crc_to_usd(cents, hundredths))
+    else:
+        fmt = format_crc_display
     return templates.TemplateResponse(
         request,
         "bids.html",
         {
+            "fmt": fmt,
+            "unit": "USD" if rate is not None else "CRC",
+            "rate": rate_service.format_rate(rate.rate_hundredths) if rate else None,
+            "rate_at": rate.created_at.strftime("%Y-%m-%d %H:%M:%S") if rate else None,
+            "usd_missing": currency == "USD" and rate is None,
             "tender": result.tender,
             "evaluation": result,
             "bids": bids,
@@ -55,9 +70,12 @@ def _page(request: Request, db: Session, tender_id: int,
 
 
 @router.get("/tenders/{tender_id}/bids", response_class=HTMLResponse)
-def bids_page(request: Request, tender_id: int, db: Session = Depends(get_db),
+def bids_page(request: Request, tender_id: int, currency: str = "CRC",
+              db: Session = Depends(get_db),
               ranges: tuple[ApprovalRange, ...] = Depends(get_approval_ranges)):
-    return _page(request, db, tender_id, ranges)
+    # Display-only toggle: anything other than USD falls back to CRC.
+    return _page(request, db, tender_id, ranges,
+                 currency="USD" if currency.upper() == "USD" else "CRC")
 
 
 @router.post("/tenders/{tender_id}/bids", response_class=HTMLResponse)

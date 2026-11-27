@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}Tipo de cambio{% endblock %}
+{% block content %}
+<h1>Tipo de cambio</h1>
+<section id="current-rate" aria-label="Tipo de cambio vigente">
+{% if rate_text %}
+  <p>Vigente: <strong>{{ rate_text }}</strong> CRC por USD (registrado el {{ rate_at }})</p>
+{% else %}
+  <p>No hay un tipo de cambio configurado.</p>
+{% endif %}
+</section>
+<form method="post" action="/exchange-rate">
+  <p><label for="crc_per_usd">Colones por dólar (CRC por USD)</label><br>
+  <input type="text" id="crc_per_usd" name="crc_per_usd" value="{{ value }}" inputmode="decimal" required></p>
+  <button type="submit">Guardar tipo de cambio</button>
+</form>
+{% if error %}<div class="error" role="alert">{{ error }}</div>{% endif %}
+{% endblock %}

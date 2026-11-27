@@ -32,6 +32,11 @@ python -m pytest --cov=app
 - Reglas: solo licitaciones `Publicada` y estrictamente antes del cierre (409 por estado o plazo); monto > 0 y <= presupuesto (422); una oferta por proveedor y licitación (409, UNIQUE en BD); licitación inexistente 404, `supplier_id` inexistente en el cuerpo 422.
 - Evaluación: mejor oferta = monto menor (empate: la registrada primero); ahorro = (presupuesto - mejor) / presupuesto, clasificado con aritmética exacta (>= 10 % Conveniente, > 0 % Aceptable, 0 % Válida sin ahorro); aprobador por monto de la mejor oferta (< 1 000 000,00 Encargado de área; < 10 000 000,00 Gerencia; resto Junta Directiva). Rangos configurables en `app/approval.py` (intervalos semiabiertos en centavos) vía `create_app(approval_ranges=...)`.
 
+## Tipo de cambio
+- Web: `GET/POST /exchange-rate` (formulario y tipo vigente); en `/tenders/{id}/bids?currency=USD` se muestran los montos en USD con el tipo y la fecha usados (por defecto CRC, sin JavaScript).
+- API: `POST /api/exchange-rate` (cuerpo `{"crc_per_usd": "500.00"}`, 201), `GET /api/exchange-rate` (404 si no hay tipo configurado), `GET /api/tenders/{id}/evaluation/usd` (409 si no hay tipo configurado).
+- Reglas: CRC por USD > 0, hasta 2 decimales, máximo 100000.00, sin notación científica (422 si es inválido). Se conserva el historial; el último registro es el vigente. Solo se guarda CRC: USD = CRC / tipo, redondeo half-up a 2 decimales, calculado al mostrar (ej. 9 000 000,00 CRC a 500.00 = 18 000,00 USD).
+
 ## Reinicio de datos sintéticos
 (pendiente)
 
