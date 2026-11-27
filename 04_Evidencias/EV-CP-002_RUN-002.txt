@@ -1,0 +1,11 @@
+# RUN-002 | CP-002 | REQ-002 | Unitaria
+# commit d3304e4 | 2026-11-26 23:08:09 | 1.3s | node tests/qa/test_cp_unit.py::test_cp002_tender_field_rules
+
+.                                                                        [100%]
+============================== warnings summary ===============================
+.venv\Lib\site-packages\starlette\testclient.py:37
+  C:\Users\uyv31\Downloads\Practica_Integradora\Bid-Management\.venv\Lib\site-packages\starlette\testclient.py:37: DeprecationWarning: The anyio.abc.BlockingPortal alias is deprecated, use anyio.from_thread.BlockingPortal instead.
+    _PortalFactoryType = typing.Callable[[], typing.ContextManager[anyio.abc.BlockingPortal]]
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+1 passed, 1 warning in 0.05s

@@ -1,0 +1,11 @@
+# RUN-004 | CP-004 | REQ-005 | Unitaria
+# commit d3304e4 | 2026-11-26 23:08:12 | 1.28s | node tests/qa/test_cp_unit.py::test_cp004_bid_amount_limits
+
+.                                                                        [100%]
+============================== warnings summary ===============================
+.venv\Lib\site-packages\starlette\testclient.py:37
+  C:\Users\uyv31\Downloads\Practica_Integradora\Bid-Management\.venv\Lib\site-packages\starlette\testclient.py:37: DeprecationWarning: The anyio.abc.BlockingPortal alias is deprecated, use anyio.from_thread.BlockingPortal instead.
+    _PortalFactoryType = typing.Callable[[], typing.ContextManager[anyio.abc.BlockingPortal]]
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+1 passed, 1 warning in 0.07s

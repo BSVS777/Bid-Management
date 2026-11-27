@@ -1,0 +1,48 @@
+........................................................................ [ 10%]
+........................................................................ [ 21%]
+........................................................................ [ 31%]
+........................................................................ [ 42%]
+........................................................................ [ 53%]
+........................................................................ [ 63%]
+........................................................................ [ 74%]
+........................................................................ [ 84%]
+........................................................................ [ 95%]
+..............................                                           [100%]
+============================== warnings summary ===============================
+.venv\Lib\site-packages\starlette\testclient.py:37
+    _PortalFactoryType = typing.Callable[[], typing.ContextManager[anyio.abc.BlockingPortal]]
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+
+---------- coverage: platform win32, python 3.12.10-final-0 ----------
+Name                               Stmts   Miss  Cover
+------------------------------------------------------
+app\__init__.py                        0      0   100%
+app\approval.py                       47      0   100%
+app\auth.py                           59      3    95%
+app\clock.py                           8      0   100%
+app\database.py                       21      0   100%
+app\main.py                          115      0   100%
+app\models.py                         44      0   100%
+app\money.py                          38      0   100%
+app\routers\__init__.py                0      0   100%
+app\routers\bids.py                   85      0   100%
+app\routers\bids_web.py               70      0   100%
+app\routers\exchange_rate.py          81      0   100%
+app\routers\exchange_rate_web.py      31      0   100%
+app\routers\suppliers.py              47      0   100%
+app\routers\suppliers_web.py          52      1    98%
+app\routers\tenders.py                72      0   100%
+app\routers\tenders_web.py            85      0   100%
+app\routers\users.py                  70      0   100%
+app\routers\users_web.py              54      0   100%
+app\services\__init__.py               0      0   100%
+app\services\bids.py                 122      0   100%
+app\services\exchange_rate.py         67      2    97%
+app\services\suppliers.py             74      6    92%
+app\services\tenders.py              152      3    98%
+app\services\users.py                 91      6    93%
+------------------------------------------------------
+TOTAL                               1485     21    99%
+
+678 passed, 1 warning in 41.35s

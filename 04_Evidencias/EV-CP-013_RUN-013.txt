@@ -1,0 +1,11 @@
+# RUN-013 | CP-013 | REQ-007 | Funcional
+# commit d3304e4 | 2026-11-26 23:08:23 | 1.38s | node tests/qa/test_cp_functional.py::test_cp013_bids_and_evaluation_page
+
+.                                                                        [100%]
+============================== warnings summary ===============================
+.venv\Lib\site-packages\starlette\testclient.py:37
+  C:\Users\uyv31\Downloads\Practica_Integradora\Bid-Management\.venv\Lib\site-packages\starlette\testclient.py:37: DeprecationWarning: The anyio.abc.BlockingPortal alias is deprecated, use anyio.from_thread.BlockingPortal instead.
+    _PortalFactoryType = typing.Callable[[], typing.ContextManager[anyio.abc.BlockingPortal]]
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+1 passed, 1 warning in 0.16s
