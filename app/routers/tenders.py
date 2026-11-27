@@ -103,3 +103,11 @@ def close(tender_id: int, db: Session = Depends(get_db)):
         return to_out(service.close_tender(db, tender_id))
     except service.TenderError as exc:
         raise to_http_error(exc) from None
+
+
+@router.delete("/{tender_id}", status_code=204)
+def delete(tender_id: int, db: Session = Depends(get_db)):
+    try:
+        service.delete_tender(db, tender_id)
+    except service.TenderError as exc:
+        raise to_http_error(exc) from None

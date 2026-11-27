@@ -6,7 +6,7 @@ from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
-from app.models import Tender
+from app.models import Bid, Tender
 from app.money import InvalidMoneyError, parse_crc_to_cents
 
 MAX_CODE_LENGTH = 30
@@ -236,3 +236,16 @@ def close_tender(session: Session, tender_id: int) -> Tender:
     tender.status = TenderStatus.CLOSED
     session.commit()
     return tender
+
+
+def delete_tender(session: Session, tender_id: int) -> None:
+    """Delete a tender; only drafts without bids."""
+    tender = get_tender(session, tender_id)
+    if tender.status != TenderStatus.DRAFT:
+        raise InvalidTransitionError(
+            "Solo se puede eliminar una licitación en estado Borrador.")
+    if session.scalars(select(Bid.id).where(Bid.tender_id == tender.id)).first():
+        raise InvalidTransitionError(
+            "No se puede eliminar la licitación porque tiene ofertas registradas.")
+    session.delete(tender)
+    session.commit()

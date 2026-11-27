@@ -2,7 +2,7 @@
 from datetime import datetime
 from pathlib import Path
 
-from fastapi import APIRouter, Depends, Form, Request
+from fastapi import APIRouter, Depends, Form, HTTPException, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
@@ -26,6 +26,9 @@ def _page(request: Request, db: Session, value: str = "",
         {
             "rate_text": service.format_rate(rate.rate_hundredths) if rate else None,
             "rate_at": rate.created_at.strftime("%Y-%m-%d %H:%M:%S") if rate else None,
+            "history": [(r.id, service.format_rate(r.rate_hundredths),
+                         r.created_at.strftime("%Y-%m-%d %H:%M:%S"))
+                        for r in reversed(service.list_rates(db))],
             "value": value,
             "error": error,
         },
@@ -45,4 +48,13 @@ def update(request: Request, crc_per_usd: str = Form(""),
         service.set_rate(db, now, crc_per_usd)
     except service.InvalidRateError as exc:
         return _page(request, db, crc_per_usd, str(exc), 422)
+    return RedirectResponse("/exchange-rate", status_code=303)
+
+
+@router.post("/exchange-rate/{rate_id}/delete", response_class=HTMLResponse)
+def delete(rate_id: int, db: Session = Depends(get_db)):
+    try:
+        service.delete_rate(db, rate_id)
+    except service.RateNotFoundError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from None
     return RedirectResponse("/exchange-rate", status_code=303)

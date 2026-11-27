@@ -29,6 +29,12 @@ class RateOut(BaseModel):
     set_at: str
 
 
+class RateItemOut(BaseModel):
+    id: int
+    crc_per_usd: str
+    set_at: str
+
+
 class UsdBidOut(BaseModel):
     supplier_name: str
     amount_usd: str
@@ -70,6 +76,32 @@ def current(db: Session = Depends(get_db)):
     try:
         return to_out(service.require_rate(db))
     except service.RateNotConfiguredError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from None
+
+
+def to_item(row) -> RateItemOut:
+    return RateItemOut(id=row.id, crc_per_usd=service.format_rate(row.rate_hundredths),
+                       set_at=row.created_at.isoformat(timespec="seconds"))
+
+
+@router.get("/api/exchange-rate/history", response_model=list[RateItemOut])
+def history(db: Session = Depends(get_db)):
+    return [to_item(r) for r in service.list_rates(db)]
+
+
+@router.get("/api/exchange-rate/{rate_id}", response_model=RateItemOut)
+def get_one(rate_id: int, db: Session = Depends(get_db)):
+    try:
+        return to_item(service.get_rate(db, rate_id))
+    except service.RateNotFoundError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from None
+
+
+@router.delete("/api/exchange-rate/{rate_id}", status_code=204)
+def delete(rate_id: int, db: Session = Depends(get_db)):
+    try:
+        service.delete_rate(db, rate_id)
+    except service.RateNotFoundError as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from None
 
 

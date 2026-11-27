@@ -226,7 +226,7 @@ def test_evaluation_approver_boundaries(tclient, world, best, approver):
 
 def test_evaluation_uses_configured_ranges(db_url, clock):
     ranges = [ApprovalRange(1, 100, "Jefe"), ApprovalRange(100, None, "Director")]
-    with TestClient(create_app(db_url, clock=clock, approval_ranges=ranges)) as c:
+    with TestClient(create_app(db_url, auth_enabled=False, clock=clock, approval_ranges=ranges)) as c:
         t = add_tender(c)
         p = add_supplier(c, P1_NAME)
         post_bid(c, t, p, "5")
@@ -256,13 +256,13 @@ def test_evaluation_available_on_closed_tender(tclient, world):
 
 def test_persistence_across_app_instances(db_url):
     clock = FakeClock()
-    with TestClient(create_app(db_url, clock=clock)) as first:
+    with TestClient(create_app(db_url, auth_enabled=False, clock=clock)) as first:
         t = add_tender(first)
         p1 = add_supplier(first, P1_NAME)
         p2 = add_supplier(first, P2_NAME)
         post_bid(first, t, p1, "9000000.00")
         post_bid(first, t, p2, "9500000.00")
-    with TestClient(create_app(db_url, clock=clock)) as second:
+    with TestClient(create_app(db_url, auth_enabled=False, clock=clock)) as second:
         bids = second.get(f"/api/tenders/{t}/bids").json()
         assert [b["amount_crc"] for b in bids] == ["9000000.00", "9500000.00"]
         ev = second.get(f"/api/tenders/{t}/evaluation").json()

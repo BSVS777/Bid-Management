@@ -27,6 +27,7 @@
       <td>{{ t.status }}</td>
       <td>
         <a href="/tenders/{{ t.id }}/bids">Ofertas</a>
+        <form method="post" action="/tenders/{{ t.id }}/delete" style="display:inline" onsubmit="return confirm('¿Eliminar esta licitación?')"><button type="submit">Eliminar</button></form>
         {% if t.status == DRAFT %}
           <a href="/tenders/{{ t.id }}/edit">Editar</a>
           <form method="post" action="/tenders/{{ t.id }}/publish" style="display:inline"><button type="submit">Publicar</button></form>

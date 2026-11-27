@@ -27,7 +27,7 @@ def to_http_error(exc: service.SupplierError) -> HTTPException:
     """Map a domain error to a safe HTTP error."""
     if isinstance(exc, service.InvalidSupplierError):
         return HTTPException(status_code=422, detail=str(exc))
-    if isinstance(exc, service.DuplicateSupplierError):
+    if isinstance(exc, (service.DuplicateSupplierError, service.SupplierInUseError)):
         return HTTPException(status_code=409, detail=str(exc))
     return HTTPException(status_code=404, detail=str(exc))
 
@@ -57,5 +57,13 @@ def get_one(supplier_id: int, db: Session = Depends(get_db)):
 def update(supplier_id: int, payload: SupplierIn, db: Session = Depends(get_db)):
     try:
         return to_out(service.update_supplier(db, supplier_id, payload.name))
+    except service.SupplierError as exc:
+        raise to_http_error(exc) from None
+
+
+@router.delete("/{supplier_id}", status_code=204)
+def delete(supplier_id: int, db: Session = Depends(get_db)):
+    try:
+        service.delete_supplier(db, supplier_id)
     except service.SupplierError as exc:
         raise to_http_error(exc) from None
