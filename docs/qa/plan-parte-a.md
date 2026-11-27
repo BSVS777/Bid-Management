@@ -2,8 +2,8 @@
 
 Sistema de Gestión de Licitaciones (Bid-Management) · ISW-622 Práctica Integradora · Wonder Team
 
-> Los casos de prueba (A10), el defecto inducido (A11) y el cronograma (A12) se agregan en commits posteriores.
-> Las columnas "CP vinculados" se completan junto con la trazabilidad REQ ↔ CP.
+> Los casos de prueba (A10) están en [`casos-de-prueba.md`](casos-de-prueba.md) y la trazabilidad REQ → CP → RUN → EV en [`trazabilidad.md`](trazabilidad.md). El defecto inducido (A11) y el cronograma (A12) se agregan en commits posteriores.
+> La columna "CP vinculados" de A3 ya está completa (CP-017 sigue PENDIENTE de ejecución humana).
 
 ## A1. Identificación y objetivo
 
@@ -31,20 +31,20 @@ Sistema de Gestión de Licitaciones (Bid-Management) · ISW-622 Práctica Integr
 
 | ID | Área | Criterio verificable | Prioridad | CP vinculados |
 |---|---|---|---|---|
-| REQ-001 | Proveedores | Crear/editar/listar; duplicados por nombre normalizado (recortar, compactar espacios, sin distinguir mayúsculas) | Alta | (pendiente) |
-| REQ-002 | Licitaciones | Código único (sin distinguir mayúsculas/espacios laterales); título no vacío; presupuesto CRC > 0; cierre futuro al crear/publicar | Alta | (pendiente) |
-| REQ-003 | Estados | Solo Borrador→Publicada/Cerrada y Publicada→Cerrada; sin regresar a Borrador ni reabrir Cerrada | Alta | (pendiente) |
-| REQ-004 | Vencimiento | Ofertas solo en Publicadas y antes del cierre; exactamente en el cierre se rechazan | Alta | (pendiente) |
-| REQ-005 | Montos | Oferta > 0 y ≤ presupuesto; igual al presupuesto es válida; cero, negativo o superior se rechazan | Alta | (pendiente) |
-| REQ-006 | Duplicados | Un proveedor, una oferta por licitación; duplicados también rechazados por la BD | Alta | (pendiente) |
-| REQ-007 | Mejor oferta | Menor oferta válida en CRC; empate gana la primera registrada; sin ofertas: "Sin ofertas válidas" | Alta | (pendiente) |
-| REQ-008 | Ahorro | ((presupuesto − mejor oferta)/presupuesto)×100; ≥10 % conveniente; >0 y <10 % aceptable; 0 % válida sin ahorro | Alta | (pendiente) |
-| REQ-009 | Aprobación | Rangos configurables sin traslape: Encargado de Área / Gerencia / Junta Directiva (sobre la mejor oferta válida) | Alta | (pendiente) |
-| REQ-010 | Moneda | Solo CRC persistido; USD = CRC/tasa (>0); mostrar tasa y fecha; alternar vista no modifica la BD | Media | (pendiente) |
-| REQ-011 | Persistencia/API | Datos persisten al reiniciar; API con respuestas de éxito y error; no acepta lo que la UI rechazaría | Alta | (pendiente) |
-| REQ-012 | Seguridad | Solo letras, números, espacios, punto, coma y paréntesis en nombre de proveedor; sin ejecución HTML/script; ocultar errores internos | Alta | (pendiente) |
-| REQ-013 | Usabilidad | Con 2 personas ajenas al equipo, ≥3 de 4 tareas completadas sin ayuda | Media | (pendiente) |
-| REQ-014 | Rendimiento | 5 VU, 30 s, GET listado: p95 ≤ 1 500 ms y errores ≤ 5 %; registrar CPU/RAM y configuración | Media | (pendiente) |
+| REQ-001 | Proveedores | Crear/editar/listar; duplicados por nombre normalizado (recortar, compactar espacios, sin distinguir mayúsculas) | Alta | CP-001, CP-011 |
+| REQ-002 | Licitaciones | Código único (sin distinguir mayúsculas/espacios laterales); título no vacío; presupuesto CRC > 0; cierre futuro al crear/publicar | Alta | CP-002, CP-012 |
+| REQ-003 | Estados | Solo Borrador→Publicada/Cerrada y Publicada→Cerrada; sin regresar a Borrador ni reabrir Cerrada | Alta | CP-003, CP-012 |
+| REQ-004 | Vencimiento | Ofertas solo en Publicadas y antes del cierre; exactamente en el cierre se rechazan | Alta | CP-014, CP-019 |
+| REQ-005 | Montos | Oferta > 0 y ≤ presupuesto; igual al presupuesto es válida; cero, negativo o superior se rechazan | Alta | CP-004, CP-020 |
+| REQ-006 | Duplicados | Un proveedor, una oferta por licitación; duplicados también rechazados por la BD | Alta | CP-008 |
+| REQ-007 | Mejor oferta | Menor oferta válida en CRC; empate gana la primera registrada; sin ofertas: "Sin ofertas válidas" | Alta | CP-005, CP-013 |
+| REQ-008 | Ahorro | ((presupuesto − mejor oferta)/presupuesto)×100; ≥10 % conveniente; >0 y <10 % aceptable; 0 % válida sin ahorro | Alta | CP-006 |
+| REQ-009 | Aprobación | Rangos configurables sin traslape: Encargado de Área / Gerencia / Junta Directiva (sobre la mejor oferta válida) | Alta | CP-007 |
+| REQ-010 | Moneda | Solo CRC persistido; USD = CRC/tasa (>0); mostrar tasa y fecha; alternar vista no modifica la BD | Media | CP-010 |
+| REQ-011 | Persistencia/API | Datos persisten al reiniciar; API con respuestas de éxito y error; no acepta lo que la UI rechazaría | Alta | CP-009 |
+| REQ-012 | Seguridad | Solo letras, números, espacios, punto, coma y paréntesis en nombre de proveedor; sin ejecución HTML/script; ocultar errores internos | Alta | CP-015, CP-016 |
+| REQ-013 | Usabilidad | Con 2 personas ajenas al equipo, ≥3 de 4 tareas completadas sin ayuda | Media | CP-017 |
+| REQ-014 | Rendimiento | 5 VU, 30 s, GET listado: p95 ≤ 1 500 ms y errores ≤ 5 %; registrar CPU/RAM y configuración | Media | CP-018 |
 
 ## A4. Datos de prueba y versiones
 
