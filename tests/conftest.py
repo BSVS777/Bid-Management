@@ -31,7 +31,7 @@ def db_url(tmp_path):
 
 @pytest.fixture
 def client(db_url):
-    with TestClient(create_app(db_url), follow_redirects=False) as c:
+    with TestClient(create_app(db_url, auth_enabled=False), follow_redirects=False) as c:
         yield c
 
 
@@ -43,7 +43,7 @@ def clock():
 @pytest.fixture
 def tclient(db_url, clock):
     """Client whose app uses the fixed FakeClock."""
-    with TestClient(create_app(db_url, clock=clock), follow_redirects=False) as c:
+    with TestClient(create_app(db_url, auth_enabled=False, clock=clock), follow_redirects=False) as c:
         yield c
 
 
@@ -55,3 +55,28 @@ def session(db_url):
     yield s
     s.close()
     engine.dispose()
+
+
+USERNAME = "tester"
+PASSWORD = "Sintetica-Clave1"  # synthetic test credential, not a real secret
+
+
+@pytest.fixture
+def auth_client(db_url, clock):
+    """Client against an app with auth ENABLED and one synthetic user; no credentials."""
+    from app.services.users import create_user
+
+    app = create_app(db_url, clock=clock, secret_key="test-secret-key")
+    with TestClient(app, follow_redirects=False) as c:
+        with app.state.session_factory() as db:
+            create_user(db, NOW, USERNAME, PASSWORD)
+        yield c
+
+
+@pytest.fixture
+def authed(auth_client):
+    """Same client, carrying a Bearer token obtained through the real login endpoint."""
+    r = auth_client.post("/api/auth/login",
+                         json={"username": USERNAME, "password": PASSWORD})
+    auth_client.headers["Authorization"] = f"Bearer {r.json()['token']}"
+    return auth_client

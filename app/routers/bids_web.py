@@ -109,3 +109,21 @@ def supplier_bids_page(request: Request, supplier_id: int,
         "supplier_bids.html",
         {"supplier": supplier, "bids": service.list_bids_by_supplier(db, supplier_id)},
     )
+
+
+@router.post("/tenders/{tender_id}/bids/{bid_id}/delete", response_class=HTMLResponse)
+def delete(request: Request, tender_id: int, bid_id: int,
+           db: Session = Depends(get_db), now: datetime = Depends(get_now),
+           ranges: tuple[ApprovalRange, ...] = Depends(get_approval_ranges)):
+    try:
+        bid = service.get_bid(db, bid_id)
+        if bid.tender_id != tender_id:  # the bid must belong to the tender in the URL
+            raise service.BidTargetNotFoundError("Oferta no encontrada.")
+        service.delete_bid(db, now, bid_id)
+    except service.BidError as exc:
+        http_exc = to_http_error(exc)
+        if http_exc.status_code == 404:
+            raise http_exc from None
+        return _page(request, db, tender_id, ranges, error=http_exc.detail,
+                     status_code=http_exc.status_code)
+    return RedirectResponse(f"/tenders/{tender_id}/bids", status_code=303)

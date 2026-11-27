@@ -64,13 +64,13 @@ def test_amount_outside_config_raises():
 
 def test_create_app_rejects_invalid_ranges(db_url):
     with pytest.raises(ValueError):
-        create_app(db_url, approval_ranges=[ApprovalRange(1, 10, "A")])
+        create_app(db_url, auth_enabled=False, approval_ranges=[ApprovalRange(1, 10, "A")])
 
 
 def test_create_app_stores_validated_ranges(db_url):
     custom = [ApprovalRange(1, 100, "A"), ApprovalRange(100, None, "B")]
-    app = create_app(db_url, approval_ranges=custom)
+    app = create_app(db_url, auth_enabled=False, approval_ranges=custom)
     assert app.state.approval_ranges == tuple(custom)
-    assert create_app(db_url).state.approval_ranges == R
+    assert create_app(db_url, auth_enabled=False).state.approval_ranges == R
     with TestClient(app):
         pass

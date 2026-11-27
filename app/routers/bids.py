@@ -35,6 +35,10 @@ class BidOut(BaseModel):
     created_at: str
 
 
+class BidUpdate(BaseModel):
+    amount_crc: StrictStr | StrictInt | StrictFloat
+
+
 class EvaluationOut(BaseModel):
     tender_id: int
     tender_code: str
@@ -112,3 +116,29 @@ def evaluation(tender_id: int, db: Session = Depends(get_db),
         approver=result.approver,
         message=result.message,
     )
+
+
+@router.get("/api/bids/{bid_id}", response_model=BidOut)
+def get_one(bid_id: int, db: Session = Depends(get_db)):
+    try:
+        return to_out(service.get_bid(db, bid_id))
+    except service.BidError as exc:
+        raise to_http_error(exc) from None
+
+
+@router.put("/api/bids/{bid_id}", response_model=BidOut)
+def update(bid_id: int, payload: BidUpdate, db: Session = Depends(get_db),
+           now: datetime = Depends(get_now)):
+    try:
+        return to_out(service.update_bid(db, now, bid_id, payload.amount_crc))
+    except service.BidError as exc:
+        raise to_http_error(exc) from None
+
+
+@router.delete("/api/bids/{bid_id}", status_code=204)
+def delete(bid_id: int, db: Session = Depends(get_db),
+           now: datetime = Depends(get_now)):
+    try:
+        service.delete_bid(db, now, bid_id)
+    except service.BidError as exc:
+        raise to_http_error(exc) from None

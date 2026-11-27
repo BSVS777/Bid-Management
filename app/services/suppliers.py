@@ -5,7 +5,7 @@ from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
-from app.models import Supplier
+from app.models import Bid, Supplier
 
 MAX_NAME_LENGTH = 120
 ALLOWED_PUNCTUATION = " .,()"
@@ -21,6 +21,10 @@ class InvalidSupplierError(SupplierError):
 
 class DuplicateSupplierError(SupplierError):
     """Another supplier already has an equivalent name."""
+
+
+class SupplierInUseError(SupplierError):
+    """The supplier has bids and cannot be deleted (HTTP 409)."""
 
 
 class SupplierNotFoundError(SupplierError):
@@ -109,3 +113,13 @@ def update_supplier(session: Session, supplier_id: int, name: object) -> Supplie
 
 def list_suppliers(session: Session) -> list[Supplier]:
     return list(session.scalars(select(Supplier).order_by(Supplier.id)))
+
+
+def delete_supplier(session: Session, supplier_id: int) -> None:
+    """Delete a supplier; refused while it has bids (keeps bid history intact)."""
+    supplier = get_supplier(session, supplier_id)
+    if session.scalars(select(Bid.id).where(Bid.supplier_id == supplier.id)).first():
+        raise SupplierInUseError(
+            "No se puede eliminar el proveedor porque tiene ofertas registradas.")
+    session.delete(supplier)
+    session.commit()

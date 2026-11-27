@@ -183,3 +183,35 @@ def evaluate_tender(session: Session, tender_id: int,
         classification=classify(tender.budget_cents, best.amount_cents),
         approver=approver_for(ranges, best.amount_cents), message=None,
     )
+
+
+def get_bid(session: Session, bid_id: int) -> Bid:
+    bid = session.get(Bid, bid_id)
+    if bid is None:
+        raise BidTargetNotFoundError("Oferta no encontrada.")
+    return bid
+
+
+def _require_open(bid: Bid, now: datetime) -> None:
+    """Bids may only change while the tender is 'Publicada' and before closing."""
+    if bid.tender.status != TenderStatus.PUBLISHED:
+        raise BidNotAllowedError(
+            "Solo se pueden modificar ofertas de licitaciones en estado Publicada.")
+    if now >= bid.tender.closing_at:
+        raise BidNotAllowedError("La licitación ya cerró: la oferta no se puede modificar.")
+
+
+def update_bid(session: Session, now: datetime, bid_id: int, amount_crc: object) -> Bid:
+    """Change the amount of a bid, re-validated with the creation rules."""
+    bid = get_bid(session, bid_id)
+    _require_open(bid, now)
+    bid.amount_cents = validate_amount(amount_crc, bid.tender.budget_cents)
+    session.commit()
+    return bid
+
+
+def delete_bid(session: Session, now: datetime, bid_id: int) -> None:
+    bid = get_bid(session, bid_id)
+    _require_open(bid, now)
+    session.delete(bid)
+    session.commit()

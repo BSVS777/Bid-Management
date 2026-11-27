@@ -81,3 +81,16 @@ class ExchangeRate(Base):
     rate_hundredths: Mapped[int] = mapped_column(Integer, nullable=False)
     # Registration instant from the injected clock (naive local datetime).
     created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)
+
+
+class User(Base):
+    """An application user; only a salted scrypt hash of the password is stored."""
+
+    __tablename__ = "users"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    username: Mapped[str] = mapped_column(String(50), nullable=False)
+    # Casefolded username; the UNIQUE constraint enforces case-insensitive uniqueness.
+    username_key: Mapped[str] = mapped_column(String(50), nullable=False, unique=True)
+    password_hash: Mapped[str] = mapped_column(String(200), nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False)

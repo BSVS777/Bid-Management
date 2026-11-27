@@ -255,10 +255,10 @@ def test_published_tender_can_be_closed_after_deadline(tclient, clock):
 # --- app-level behavior ----------------------------------------------------------
 
 def test_persistence_across_app_instances(db_url, clock):
-    with TestClient(create_app(db_url, clock=clock)) as c1:
+    with TestClient(create_app(db_url, auth_enabled=False, clock=clock)) as c1:
         assert c1.post("/api/tenders", json=REF).status_code == 201
         c1.post("/api/tenders/1/publish")
-    with TestClient(create_app(db_url, clock=clock)) as c2:
+    with TestClient(create_app(db_url, auth_enabled=False, clock=clock)) as c2:
         data = c2.get("/api/tenders/1").json()
         assert data["code"] == "LIC-2026-001"
         assert data["status"] == "Publicada"
@@ -270,7 +270,7 @@ def test_default_clock_is_system_time(db_url):
     from datetime import datetime
     future = (datetime.now() + timedelta(days=1)).isoformat(timespec="seconds")
     past = (datetime.now() - timedelta(days=1)).isoformat(timespec="seconds")
-    with TestClient(create_app(db_url)) as c:
+    with TestClient(create_app(db_url, auth_enabled=False)) as c:
         assert c.post("/api/tenders", json=body(closing_at=future)).status_code == 201
         assert c.post("/api/tenders", json=body(code="B", closing_at=past)).status_code == 422
 

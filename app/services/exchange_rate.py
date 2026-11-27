@@ -32,6 +32,10 @@ class InvalidRateError(ExchangeRateError):
     """The rate is not a valid positive amount (HTTP 422)."""
 
 
+class RateNotFoundError(ExchangeRateError):
+    """No rate exists with the requested id (HTTP 404)."""
+
+
 class RateNotConfiguredError(ExchangeRateError):
     """No exchange rate has been configured yet."""
 
@@ -97,3 +101,21 @@ def usd_to_crc(usd_cents: int, rate_hundredths: int) -> int:
     numerator = abs(usd_cents) * rate_hundredths
     result = (2 * numerator + 100) // 200
     return -result if usd_cents < 0 else result
+
+
+def list_rates(session: Session) -> list[ExchangeRate]:
+    """Full history, oldest first."""
+    return list(session.scalars(select(ExchangeRate).order_by(ExchangeRate.id)))
+
+
+def get_rate(session: Session, rate_id: int) -> ExchangeRate:
+    row = session.get(ExchangeRate, rate_id)
+    if row is None:
+        raise RateNotFoundError("Tipo de cambio no encontrado.")
+    return row
+
+
+def delete_rate(session: Session, rate_id: int) -> None:
+    """Remove one history entry; the newest remaining row becomes current."""
+    session.delete(get_rate(session, rate_id))
+    session.commit()

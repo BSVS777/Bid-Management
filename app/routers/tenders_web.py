@@ -136,3 +136,16 @@ def close(request: Request, tender_id: int, db: Session = Depends(get_db)):
         return _list_page(request, db, error=http_exc.detail,
                           status_code=http_exc.status_code)
     return RedirectResponse("/tenders", status_code=303)
+
+
+@router.post("/tenders/{tender_id}/delete", response_class=HTMLResponse)
+def delete(request: Request, tender_id: int, db: Session = Depends(get_db)):
+    try:
+        service.delete_tender(db, tender_id)
+    except service.TenderError as exc:
+        http_exc = to_http_error(exc)
+        if http_exc.status_code == 404:
+            raise http_exc from None
+        return _list_page(request, db, error=http_exc.detail,
+                          status_code=http_exc.status_code)
+    return RedirectResponse("/tenders", status_code=303)

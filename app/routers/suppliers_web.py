@@ -72,3 +72,16 @@ def edit(request: Request, supplier_id: int, name: str = Form(""),
         return _edit_page(request, supplier_id, name, http_exc.detail,
                           http_exc.status_code)
     return RedirectResponse("/suppliers", status_code=303)
+
+
+@router.post("/suppliers/{supplier_id}/delete", response_class=HTMLResponse)
+def delete(request: Request, supplier_id: int, db: Session = Depends(get_db)):
+    try:
+        service.delete_supplier(db, supplier_id)
+    except service.SupplierError as exc:
+        http_exc = to_http_error(exc)
+        if http_exc.status_code == 404:
+            raise http_exc from None
+        return _list_page(request, db, error=http_exc.detail,
+                          status_code=http_exc.status_code)
+    return RedirectResponse("/suppliers", status_code=303)

@@ -83,16 +83,16 @@ def test_unknown_id_404(client):
 
 
 def test_persistence_across_app_instances(db_url):
-    with TestClient(create_app(db_url)) as c1:
+    with TestClient(create_app(db_url, auth_enabled=False)) as c1:
         post(c1, P1)
         post(c1, P2)
-    with TestClient(create_app(db_url)) as c2:
+    with TestClient(create_app(db_url, auth_enabled=False)) as c2:
         assert [s["name"] for s in c2.get("/api/suppliers").json()] == [P1, P2]
         assert post(c2, P1.upper()).status_code == 409
 
 
 def test_unhandled_error_is_generic(db_url):
-    app = create_app(db_url)
+    app = create_app(db_url, auth_enabled=False)
 
     @app.get("/boom")
     def boom():
@@ -125,7 +125,7 @@ def test_web_list_escapes_stored_name(db_url):
     from sqlalchemy.orm import Session
 
     # Insert a hostile name directly in the DB, bypassing validation.
-    with TestClient(create_app(db_url)) as c:
+    with TestClient(create_app(db_url, auth_enabled=False)) as c:
         engine = c.app.state.engine
         with Session(engine) as s:
             s.add(Supplier(name="<script>alert(1)</script>", name_key="x"))
