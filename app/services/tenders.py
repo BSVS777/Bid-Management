@@ -227,12 +227,10 @@ def publish_tender(session: Session, now: datetime, tender_id: int) -> Tender:
 
 
 def close_tender(session: Session, tender_id: int) -> Tender:
-    """Publicada -> Cerrada."""
+    """Borrador|Publicada -> Cerrada (REQ-003); a Cerrada tender is never reopened."""
     tender = get_tender(session, tender_id)
-    if tender.status != TenderStatus.PUBLISHED:
-        raise InvalidTransitionError(
-            "Solo se puede cerrar una licitación en estado Publicada."
-        )
+    if tender.status == TenderStatus.CLOSED:
+        raise InvalidTransitionError("Solo se puede cerrar una licitación que no esté Cerrada.")
     tender.status = TenderStatus.CLOSED
     session.commit()
     return tender

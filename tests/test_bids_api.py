@@ -214,7 +214,7 @@ def test_evaluation_classifications(tclient, best, percent, cls):
 
 
 @pytest.mark.parametrize("best, approver", [
-    ("0.01", "Encargado de área"), ("999999.99", "Encargado de área"),
+    ("0.01", "Encargado de Área"), ("999999.99", "Encargado de Área"),
     ("1000000.00", "Gerencia"), ("9999999.99", "Gerencia"),
     ("10000000.00", "Junta Directiva"),
 ])

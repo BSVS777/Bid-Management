@@ -21,7 +21,7 @@ class ApprovalRange:
 
 
 DEFAULT_APPROVAL_RANGES: tuple[ApprovalRange, ...] = (
-    ApprovalRange(1, 100_000_000, "Encargado de área"),     # 0,01 - 999 999,99
+    ApprovalRange(1, 100_000_000, "Encargado de Área"),     # 0,01 - 999 999,99
     ApprovalRange(100_000_000, 1_000_000_000, "Gerencia"),  # 1 000 000,00 - 9 999 999,99
     ApprovalRange(1_000_000_000, None, "Junta Directiva"),  # >= 10 000 000,00
 )

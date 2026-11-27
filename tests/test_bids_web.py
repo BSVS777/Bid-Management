@@ -142,7 +142,7 @@ def test_evaluation_without_bids_and_classification_texts(tclient):
     web_bid(tclient, t, p, "950000")
     page = tclient.get(f"/tenders/{t}/bids").text
     assert "Ahorro: 5.00%" in page and "Clasificación: Aceptable" in page
-    assert "Aprobador: Encargado de área" in page
+    assert "Aprobador: Encargado de Área" in page
 
 
 def test_stored_script_supplier_name_never_rendered_raw(tclient, db_url, world):

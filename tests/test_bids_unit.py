@@ -306,8 +306,8 @@ def test_percent_half_up_exact_tie():
 
 
 @pytest.mark.parametrize("best, approver", [
-    ("0.01", "Encargado de área"),
-    ("999999.99", "Encargado de área"),
+    ("0.01", "Encargado de Área"),
+    ("999999.99", "Encargado de Área"),
     ("1000000.00", "Gerencia"),
     ("9999999.99", "Gerencia"),
     ("10000000.00", "Junta Directiva"),
@@ -323,7 +323,7 @@ def test_approver_uses_best_not_other_bids(session, setup):
     t, p1, p2 = setup
     bid(session, t, p1, "10000000.00")
     bid(session, t, p2, "999999.99")
-    assert service.evaluate_tender(session, t.id).approver == "Encargado de área"
+    assert service.evaluate_tender(session, t.id).approver == "Encargado de Área"
 
 
 def test_custom_ranges_used(session, setup):

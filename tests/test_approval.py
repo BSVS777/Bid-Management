@@ -9,8 +9,8 @@ R = DEFAULT_APPROVAL_RANGES
 
 
 @pytest.mark.parametrize("cents, expected", [
-    (1, "Encargado de área"),                 # 0,01
-    (99_999_999, "Encargado de área"),        # 999 999,99
+    (1, "Encargado de Área"),                 # 0,01
+    (99_999_999, "Encargado de Área"),        # 999 999,99
     (100_000_000, "Gerencia"),                # 1 000 000,00
     (999_999_999, "Gerencia"),                # 9 999 999,99
     (1_000_000_000, "Junta Directiva"),       # 10 000 000,00

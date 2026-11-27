@@ -62,9 +62,11 @@ def test_cp002_tender_field_rules(session):
 
 def test_cp003_state_transitions(session):
     """CP-003 | REQ-003 | Allowed transitions succeed and forbidden ones are rejected |
-    oracle: Borrador->Publicada, Publicada->Cerrada allowed; no return to Borrador, a Cerrada
-    tender is never reopened (NOTE: enunciado also lists Borrador->Cerrada; the app rejects it,
-    so it is not asserted here, see report)"""
+    oracle: Borrador->Publicada/Cerrada and Publicada->Cerrada allowed; no return to Borrador,
+    a Cerrada tender is never reopened"""
+    # Borrador -> Cerrada is allowed by REQ-003 (BUG-002 regression check).
+    d = tender_service.create_tender(session, NOW, "LIC-D", "Directo", "100.00", CLOSING)
+    assert tender_service.close_tender(session, d.id).status == "Cerrada"
     t = tender_service.create_tender(session, NOW, "LIC-1", "Equipo", "100.00", CLOSING)
     assert t.status == "Borrador"
     assert tender_service.publish_tender(session, NOW, t.id).status == "Publicada"
@@ -154,8 +156,7 @@ def test_cp006_saving_classification(session):
 
 def test_cp007_approver_boundaries(session):
     """CP-007 | REQ-009 | Approver at every range boundary | oracle: 0,01-999 999,99 Encargado
-    de Área; 1 000 000,00-9 999 999,99 Gerencia; >= 10 000 000,00 Junta Directiva (NOTE: app
-    label is 'Encargado de área', compared case-insensitively, see report)"""
+    de Área; 1 000 000,00-9 999 999,99 Gerencia; >= 10 000 000,00 Junta Directiva (exact label text)"""
     p1 = supplier_service.create_supplier(session, P1)
     cases = [
         ("0.01", "Encargado de Área"),
@@ -168,4 +169,4 @@ def test_cp007_approver_boundaries(session):
         t = _tender(session, f"LIC-A{i}", "20000000.00")
         bid_service.create_bid(session, NOW, t.id, p1.id, offer)
         got = bid_service.evaluate_tender(session, t.id).approver
-        assert got.casefold() == approver.casefold(), (offer, got)
+        assert got == approver, (offer, got)

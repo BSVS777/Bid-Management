@@ -196,11 +196,12 @@ def test_full_lifecycle(tclient):
     assert (r.status_code, r.json()["status"]) == (200, "Cerrada")
 
 
-def test_draft_to_closed_directly_409(tclient):
+def test_draft_to_closed_directly_allowed(tclient):
+    """REQ-003: Borrador -> Cerrada is allowed (BUG-002)."""
     create(tclient)
     r = tclient.post("/api/tenders/1/close")
-    assert r.status_code == 409
-    assert tclient.get("/api/tenders/1").json()["status"] == "Borrador"
+    assert (r.status_code, r.json()["status"]) == (200, "Cerrada")
+    assert tclient.post("/api/tenders/1/close").status_code == 409
 
 
 def test_publish_twice_409(tclient):

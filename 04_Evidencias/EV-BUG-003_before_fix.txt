@@ -1,0 +1,39 @@
+F                                                                        [100%]
+================================== FAILURES ===================================
+_______________________ test_cp007_approver_boundaries ________________________
+
+session = <sqlalchemy.orm.session.Session object at 0x0000021449802630>
+
+    def test_cp007_approver_boundaries(session):
+        """CP-007 | REQ-009 | Approver at every range boundary | oracle: 0,01-999 999,99 Encargado
+        de Área; 1 000 000,00-9 999 999,99 Gerencia; >= 10 000 000,00 Junta Directiva (exact label text)"""
+        p1 = supplier_service.create_supplier(session, P1)
+        cases = [
+            ("0.01", "Encargado de Área"),
+            ("999999.99", "Encargado de Área"),
+            ("1000000.00", "Gerencia"),
+            ("9999999.99", "Gerencia"),
+            ("10000000.00", "Junta Directiva"),
+        ]
+        for i, (offer, approver) in enumerate(cases):
+            t = _tender(session, f"LIC-A{i}", "20000000.00")
+            bid_service.create_bid(session, NOW, t.id, p1.id, offer)
+            got = bid_service.evaluate_tender(session, t.id).approver
+>           assert got == approver, (offer, got)
+E           AssertionError: ('0.01', 'Encargado de área')
+E           assert 'Encargado de área' == 'Encargado de Área'
+E             
+E             - Encargado de Área
+E             ?              ^
+E             + Encargado de área
+E             ?              ^
+
+tests\qa\test_cp_unit.py:172: AssertionError
+============================== warnings summary ===============================
+.venv\Lib\site-packages\starlette\testclient.py:37
+    _PortalFactoryType = typing.Callable[[], typing.ContextManager[anyio.abc.BlockingPortal]]
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ===========================
+FAILED tests/qa/test_cp_unit.py::test_cp007_approver_boundaries - AssertionEr...
+1 failed, 1 warning in 0.19s
