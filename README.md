@@ -57,11 +57,62 @@ python -m pytest --cov=app
 
 Códigos: 404 id inexistente, 422 entrada inválida (incluye id no numérico), 409 conflicto de reglas; DELETE exitoso responde 204 (web: 303). Los botones web de eliminar piden confirmación.
 
-## Reinicio de datos sintéticos
-(pendiente)
+## Puesta en marcha y datos sintéticos
+Requiere Python 3.12. Los valores `<...>` son placeholders: elija los suyos y no los suba al repositorio (`.env` está en `.gitignore`; las variables son `BID_ADMIN_USER`, `BID_ADMIN_PASSWORD`, `BID_SECRET_KEY` y opcional `BID_DB_URL`).
+
+**1. Entorno e instalación**
+
+PowerShell:
+```
+python -m venv .venv
+.venv\Scripts\Activate.ps1
+pip install -r requirements.txt
+$env:BID_ADMIN_USER = "<usuario>"
+$env:BID_ADMIN_PASSWORD = "<clave-de-8-o-mas-caracteres>"
+$env:BID_SECRET_KEY = "<secreto-largo-aleatorio>"
+```
+bash:
+```
+python -m venv .venv
+source .venv/Scripts/activate   # Linux/macOS: source .venv/bin/activate
+pip install -r requirements.txt
+export BID_ADMIN_USER="<usuario>" BID_ADMIN_PASSWORD="<clave-de-8-o-mas-caracteres>" BID_SECRET_KEY="<secreto-largo-aleatorio>"
+```
+
+**2. Cargar datos sintéticos (reinicia la base)**
+```
+python -m scripts.seed            # usa BID_DB_URL o sqlite:///./bid_management.db
+python -m scripts.seed --db-url sqlite:///./otra.db
+```
+**Borra todo el contenido** de la base destino y la recrea con datos ficticios, usando los servicios (se aplican las reglas de negocio). Es idempotente: ejecutarlo dos veces deja los mismos datos. Sin `BID_ADMIN_USER`/`BID_ADMIN_PASSWORD` avisa y no crea usuario.
+
+Datos cargados: tipo de cambio 500.00 CRC/USD; proveedores P1 `Tecnología Norte S.A.` y P2 `Servicios del Valle`; licitación `LIC-2026-001` (presupuesto 10 000 000,00, cierre en 48 h, Publicada) con ofertas P1 9 000 000,00 y P2 9 500 000,00. Resultado esperado: mejor oferta P1, ahorro 10 %, Conveniente, aprobador Gerencia, P1 = USD 18 000,00. Escenarios frontera (presupuesto 1 000 000,00, un proveedor cada uno): `LIC-2026-F10` oferta 900 000,00 -> 10 % Conveniente; `LIC-2026-F05` 950 000,00 -> 5 % Aceptable; `LIC-2026-F00` 1 000 000,00 -> 0 % Válida sin ahorro.
+
+**3. Iniciar el servidor e ingresar**
+```
+uvicorn app.main:app --reload
+```
+Abrir http://127.0.0.1:8000/login e ingresar con `BID_ADMIN_USER`/`BID_ADMIN_PASSWORD` (el servidor debe iniciarse con las mismas variables y la misma `BID_DB_URL` que el seed). Con `BID_SECRET_KEY` fijo las sesiones sobreviven a un reinicio.
+
+**4. Pruebas**
+```
+python -m pytest -q
+python -m pytest --cov=app --cov-report=term-missing
+```
+(La cobertura requiere `pytest-cov`.) Las pruebas usan bases SQLite temporales: no tocan `bid_management.db`.
+
+**5. Base de datos y persistencia**
+- SQLite en `bid_management.db` (raíz del proyecto), o la indicada en `BID_DB_URL`. Las tablas se crean al iniciar.
+- Reinicio manual: detener el servidor, borrar `bid_management.db` y volver a ejecutar el seed.
+- Verificar persistencia tras reinicio: cargar el seed, iniciar el servidor, anotar el total de ofertas de `/tenders/1/bids`, detener (Ctrl+C), iniciar de nuevo y comprobar que los datos siguen iguales (con `BID_SECRET_KEY` fijo no hace falta volver a ingresar).
+
+## Requisitos y trazabilidad
+La matriz de requisitos, el plan de pruebas y la trazabilidad requisito -> prueba -> evidencia están en [`docs/qa/`](docs/qa/) (ver `docs/qa/plan-parte-a.md`); las evidencias en `04_Evidencias/`.
 
 ## Estructura
 - `app/` código fuente
+- `scripts/` seed de datos sintéticos
 - `tests/` pruebas automatizadas
+- `docs/qa/` requisitos y trazabilidad
 - `04_Evidencias/` evidencias EV
 - `05_IA/` prompts y salidas saneadas
