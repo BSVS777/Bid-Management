@@ -24,7 +24,7 @@ python -m pytest --cov=app
 ## Rutas de licitaciones
 - Web: `GET/POST /tenders`, `GET/POST /tenders/{id}/edit`, `POST /tenders/{id}/publish`, `POST /tenders/{id}/close`
 - API: `POST/GET /api/tenders` (`?status=`), `GET/PUT /api/tenders/{id}`, `POST /api/tenders/{id}/publish`, `POST /api/tenders/{id}/close`
-- Cuerpo JSON: `{"code","title","budget_crc","closing_at"}`. Presupuesto en CRC con hasta 2 decimales (sin notacion cientifica ni separador de miles); se devuelve como texto con 2 decimales. Estados: Borrador -> Publicada -> Cerrada.
+- Cuerpo JSON: `{"code","title","budget_crc","closing_at"}`. Presupuesto en CRC con hasta 2 decimales (sin notacion cientifica ni separador de miles); se devuelve como texto con 2 decimales. Estados: Borrador -> Publicada/Cerrada y Publicada -> Cerrada (una Cerrada no se reabre).
 
 ## Rutas de ofertas y evaluación
 - Web: `GET/POST /tenders/{id}/bids` (formulario, lista y evaluación), `GET /suppliers/{id}/bids`

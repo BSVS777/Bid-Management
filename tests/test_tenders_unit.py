@@ -241,11 +241,12 @@ def test_publish_requires_future_closing(session):
     assert svc.get_tender(session, t.id).status == S.DRAFT
 
 
-def test_draft_cannot_be_closed_directly(session):
+def test_draft_can_be_closed_directly(session):
+    """REQ-003: Borrador -> Cerrada is allowed (BUG-002)."""
     t = make(session)
+    assert svc.close_tender(session, t.id).status == S.CLOSED
     with pytest.raises(svc.InvalidTransitionError):
         svc.close_tender(session, t.id)
-    assert svc.get_tender(session, t.id).status == S.DRAFT
 
 
 def test_publish_twice_rejected(session):

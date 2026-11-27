@@ -87,8 +87,10 @@ def test_publish_expired_shows_error(tclient, clock):
     assert "Traceback" not in r.text
 
 
-def test_close_draft_shows_409(tclient):
+def test_close_draft_allowed_then_second_close_shows_409(tclient):
+    """REQ-003: Borrador -> Cerrada is allowed (BUG-002); closing twice is rejected."""
     post(tclient)
+    assert tclient.post("/tenders/1/close").status_code in (200, 303)
     r = tclient.post("/tenders/1/close")
     assert r.status_code == 409
     assert "Solo se puede cerrar" in r.text
