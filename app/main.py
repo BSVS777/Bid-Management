@@ -11,7 +11,8 @@ from sqlalchemy.orm import sessionmaker
 from app import database
 from app.approval import DEFAULT_APPROVAL_RANGES, ApprovalRange, validate_ranges
 from app.clock import Clock, system_clock
-from app.routers import bids, bids_web, suppliers, suppliers_web, tenders, tenders_web
+from app.routers import (bids, bids_web, exchange_rate, exchange_rate_web, suppliers,
+                         suppliers_web, tenders, tenders_web)
 
 logger = logging.getLogger("bid_management")
 
@@ -42,12 +43,14 @@ def create_app(db_url: str | None = None, clock: Clock | None = None,
     @app.exception_handler(RequestValidationError)
     async def validation_handler(request: Request, _exc: RequestValidationError):
         path = request.url.path
-        if path.endswith("/bids") and request.method == "POST":
+        if path == "/api/exchange-rate":
+            detail = "Solicitud inválida: se requiere el campo 'crc_per_usd'."
+        elif path.endswith("/bids") and request.method == "POST":
             detail = (
                 "Solicitud inválida: revise los campos 'supplier_id' (entero) "
                 "y 'amount_crc'."
             )
-        elif path.endswith(("/bids", "/evaluation")):
+        elif path.endswith(("/bids", "/evaluation", "/evaluation/usd")):
             detail = "Solicitud inválida: el identificador debe ser un número entero."
         elif path.startswith("/api/tenders"):
             detail = (
@@ -73,6 +76,8 @@ def create_app(db_url: str | None = None, clock: Clock | None = None,
     app.include_router(tenders_web.router)
     app.include_router(bids.router)
     app.include_router(bids_web.router)
+    app.include_router(exchange_rate.router)
+    app.include_router(exchange_rate_web.router)
     return app
 
 
